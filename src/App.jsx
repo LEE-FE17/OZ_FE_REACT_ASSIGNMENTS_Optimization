@@ -1,25 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import "./App.css";
 
-// 리스트 항목 컴포넌트
-const ListItem = ({ item, onClick }) => {
+// 1️⃣ React.memo 적용
+const ListItem = React.memo(({ item, onClick }) => {
   console.log(`Rendering ${item}`);
   return <li onClick={() => onClick(item)}>{item}</li>;
-};
+});
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const items = ["Apple", "Banana", "Cherry", "Date", "Fig", "Grape"];
+  // 2️⃣ items 메모이제이션
+  const items = useMemo(() => {
+    return ["Apple", "Banana", "Cherry", "Date", "Fig", "Grape"];
+  }, []);
 
-  const filteredItems = items.filter((item) =>
-    item.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 3️⃣ filteredItems 메모이제이션
+  const filteredItems = useMemo(() => {
+    console.log("Filtering...");
+    return items.filter((item) =>
+      item.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, items]);
 
-  const handleItemClick = (item) => {
+  // 4️⃣ handleItemClick 메모이제이션
+  const handleItemClick = useCallback((item) => {
     setSelectedItem(item);
-  };
+  }, []);
 
   return (
     <div className="app-wrapper">
@@ -31,13 +39,17 @@ const App = () => {
           placeholder="Search..."
           className="search-input"
         />
+
         <ul className="item-list">
           {filteredItems.map((item) => (
             <ListItem key={item} item={item} onClick={handleItemClick} />
           ))}
         </ul>
+
         {selectedItem && (
-          <p className="selected-item">Selected Item: {selectedItem}</p>
+          <p className="selected-item">
+            Selected Item: {selectedItem}
+          </p>
         )}
       </div>
     </div>
